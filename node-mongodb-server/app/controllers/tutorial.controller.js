@@ -1,6 +1,29 @@
 const db = require("../models");
 const Tutorial = db.tutorials;
 
+
+// Define a function to calculate the end time by adding the hours and the movie time
+function calculateEndTime(hours, movieTime) {
+  if (!hours || !movieTime) {
+    // Return an empty string if hours or movieTime is not provided
+    return '';
+  }
+
+  // Convert the hours and movie time to minutes
+  var hoursInMinutes = parseInt(hours.split(':')[0]) * 60 + parseInt(hours.split(':')[1]);
+  var movieTimeInMinutes = movieTime;
+  // Add the minutes and convert back to hours and minutes
+  var totalMinutes = hoursInMinutes + movieTimeInMinutes;
+  var endHours = Math.floor(totalMinutes / 60);
+  var endMinutes = totalMinutes % 60;
+  // Format the end time as a string
+  return ('0' + endHours).slice(-2) + ':' + ('0' + endMinutes).slice(-2);
+}
+
+
+
+
+
 // Create and Save a new Tutorial
 exports.create = (req, res) => {
   // Validate request
@@ -9,10 +32,19 @@ exports.create = (req, res) => {
     return;
   }
 
+  // Convert date strings in ShowTime to Date objects
+  const ShowTime = req.body.ShowTime.map(ShowTime => ({
+    date: ShowTime.date,
+    hours: ShowTime.hours,
+    endTime: calculateEndTime(ShowTime.hours, req.body.MovieTime) // Use the calculateEndTime function and the MovieTime property of the request body
+  }));
+
   // Create a Tutorial
   const tutorial = new Tutorial({
     title: req.body.title,
     description: req.body.description,
+    MovieTime: req.body.MovieTime,
+    ShowTime: ShowTime,
     published: req.body.published ? req.body.published : false
   });
 
@@ -74,7 +106,15 @@ exports.update = (req, res) => {
 
   const id = req.params.id;
 
-  Tutorial.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+  // Recalculate the end time for each show time
+  const ShowTime = req.body.ShowTime.map(ShowTime => ({
+    date: ShowTime.date,
+    hours: ShowTime.hours,
+    endTime: calculateEndTime(ShowTime.hours, req.body.MovieTime) // Use the calculateEndTime function and the MovieTime property of the request body
+  }));
+
+  // Update the tutorial with the new show time array
+  Tutorial.findByIdAndUpdate(id, {...req.body, ShowTime}, { useFindAndModify: false })
     .then(data => {
       if (!data) {
         res.status(404).send({
@@ -88,6 +128,7 @@ exports.update = (req, res) => {
       });
     });
 };
+
 
 // Delete a Tutorial with the specified id in the request
 exports.delete = (req, res) => {

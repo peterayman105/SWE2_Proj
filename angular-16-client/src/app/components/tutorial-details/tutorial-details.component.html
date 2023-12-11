@@ -1,6 +1,6 @@
 <div *ngIf="viewMode; else editable">
   <div *ngIf="currentTutorial.id">
-    <h4>Tutorial</h4>
+    <h4>Movie</h4>
     <div>
       <label><strong>Title:</strong></label> {{ currentTutorial.title }}
     </div>
@@ -9,25 +9,42 @@
       {{ currentTutorial.description }}
     </div>
     <div>
+      <label><strong>Movie Time:</strong></label>
+      {{ currentTutorial.MovieTime }}
+    </div>
+  
+    <div>
+      <ul class="list-group">
+        <li
+          class="list-group-item"
+          *ngFor="let showtime of currentTutorial.ShowTime; let i = index"
+        >
+        <label><strong>Show Time {{ i + 1 }}:</strong></label><br>
+        <label><strong> Date:</strong> {{ showtime.date }}</label><br>
+        <label><strong> Start Time:</strong> {{ showtime.hours }}</label><br>
+        <label><strong> End Time:</strong> {{ showtime.endTime }}</label>
+      </li>
+      </ul>
+    </div>
+    <div>
       <label><strong>Status:</strong></label>
       {{ currentTutorial.published ? "Published" : "Pending" }}
     </div>
 
-    <a class="badge badge-warning"
-      routerLink="/tutorials/{{ currentTutorial.id }}">
-      Edit
-    </a>
+    <a class="badge badge-warning" *ngIf="!currentTutorial.published"
+    routerLink="/tutorials/{{ currentTutorial.id }}"> 
+      Edit </a>
   </div>
 
   <div *ngIf="!currentTutorial">
     <br />
-    <p>Please click on a Tutorial...</p>
+    <p>Please click on a Movie...</p>
   </div>
 </div>
 
 <ng-template #editable>
   <div *ngIf="currentTutorial.id" class="edit-form">
-    <h4>Tutorial</h4>
+    <h4>Movies</h4>
     <form>
       <div class="form-group">
         <label for="title">Title</label>
@@ -49,13 +66,51 @@
           name="description"
         />
       </div>
+  <div class="form-group">
+        <label for="MovieTime">Movie Time in minutes</label>
+        <input
+          class="form-control"
+          id="MovieTime"
+          type="number"
+          required
+          [(ngModel)]="currentTutorial.MovieTime"
+          name="MovieTime"
+          min="0"
+          max="240"
+          step="60"
+        />
+      </div>
 
+    
+      <div class="form-group">
+        <label for="showtimes">Show Times:</label>
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let showtime of currentTutorial.ShowTime; let i = index">
+            <strong>Show Time {{ i + 1 }}:</strong>
+            <br>
+            <div class="form-group">
+              <label for="date">Date:</label>
+              <input class="form-control" type="date" [(ngModel)]="showtime.date" name="date" />
+            </div>
+            <div class="form-group">
+              <label for="time">Time:</label>
+              <input class="form-control" type="time" [(ngModel)]="showtime.hours" name="time" />
+            </div>
+           <br> <button (click)="deleteShowTime()" class="btn btn-danger">Delete</button>     
+             
+
+          </li> 
+        </ul>
+      </div>
+       
       <div class="form-group">
         <label><strong>Status:</strong></label>
         {{ currentTutorial.published ? "Published" : "Pending" }}
       </div>
     </form>
-
+    <button (click)="addShowTime()" class="btn btn-success">Add Show Time</button>
+    <!-- <p *ngIf="addShowTimeMessage">{{ addShowTimeMessage }}</p> -->
+    
     <button
       class="badge badge-primary mr-2"
       *ngIf="currentTutorial.published"
@@ -63,6 +118,7 @@
     >
       UnPublish
     </button>
+    
     <button
       *ngIf="!currentTutorial.published"
       class="badge badge-primary mr-2"
@@ -87,6 +143,7 @@
 
   <div *ngIf="!currentTutorial.id">
     <br />
-    <p>Cannot access this Tutorial...</p>
+    <p>Cannot access this Movie...</p>
   </div>
+
 </ng-template>

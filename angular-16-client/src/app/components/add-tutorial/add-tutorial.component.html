@@ -1,3 +1,4 @@
+
 <div>
   <div class="submit-form">
     <div *ngIf="!submitted">
@@ -23,13 +24,53 @@
           name="description"
         />
       </div>
+<div class="form-group">
+        <label for="MovieTime">Movie Time in minutes</label>
+        <input
+          class="form-control"
+          id="MovieTime"
+          type="number"
+          required
+          [(ngModel)]="tutorial.MovieTime"
+          name="MovieTime"
+          min="0"
+          max="240"
+          step="60"
+        />
+      </div>
+    
+
+      <div class="form-group" *ngFor="let showtime of tutorial.ShowTime; let i = index">
+        <label>Show Time {{ i + 1 }}: <br>
+          Date <input class="form-control" type="date" [(ngModel)]="showtime.date" />
+          Hour <input class="form-control" type="time" [(ngModel)]="showtime.hours" />
+         <br> <button (click)="deleteShowTime()" class="btn btn-danger">Delete</button>
+        </label>
+      </div>
+
+      <!-- Add more show times button -->
+      
+      <button  (click)="addShowTime()" class="btn button">Add Show Time</button>
 
       <button (click)="saveTutorial()" class="btn btn-success">Submit</button>
+      <div *ngIf="titleExists">
+        <br><p class="error-message">A tutorial with the same title already exists. Please choose a different title.</p>
+      </div>
+      <div *ngIf="movieTimeError">
+        <br><p class="error-message">Time cannot be anegative😗</p>
+      </div>
     </div>
 
     <div *ngIf="submitted">
       <h4>Tutorial was submitted successfully!</h4>
       <button class="btn btn-success" (click)="newTutorial()">Add</button>
+      <div *ngIf="titleExists">
+        <br><p class="error-message">A tutorial with the same title already exists. Please choose a different title.</p>
+      </div>
+      <div *ngIf="movieTimeError">
+        <br><p class="error-message">Time cannot be anegative😗</p>
+      </div>
+      
     </div>
   </div>
 </div>

@@ -3,14 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tutorial } from '../models/tutorial.model';
 
-const baseUrl = 'http://localhost:8080/api/tutorials';
+const baseUrl = 'http://localhost:8000/api/tutorials';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TutorialService {
   constructor(private http: HttpClient) {}
-
+  
   getAll(): Observable<Tutorial[]> {
     return this.http.get<Tutorial[]>(baseUrl);
   }
@@ -20,7 +20,13 @@ export class TutorialService {
   }
 
   create(data: any): Observable<any> {
+    const formData = new FormData();
+  
+
+  // Append the image file
+
     return this.http.post(baseUrl, data);
+
   }
 
   update(id: any, data: any): Observable<any> {
@@ -38,4 +44,9 @@ export class TutorialService {
   findByTitle(title: any): Observable<Tutorial[]> {
     return this.http.get<Tutorial[]>(`${baseUrl}?title=${title}`);
   }
+  checkValidMovieTime(movieTime: number): boolean {
+    // Add your validation logic here
+    return movieTime >= 0 && movieTime <= 240;
+  }
+  
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { TutorialService } from 'src/app/services/tutorial.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Tutorial } from 'src/app/models/tutorial.model';
@@ -14,11 +14,12 @@ export class TutorialDetailsComponent {
   @Input() currentTutorial: Tutorial = {
     title: '',
     description: '',
-    published: false
+    MovieTime: 0,
+    ShowTime: [{ date: '', hours: '', endTime: '' }],
+    published: true,
   };
 
   message = '';
-
   constructor(
     private tutorialService: TutorialService,
     private route: ActivatedRoute,
@@ -38,19 +39,29 @@ export class TutorialDetailsComponent {
         this.currentTutorial = data;
         console.log(data);
       },
-      error: (e) => console.error(e)
+      error: (e) => console.error(e),
     });
   }
 
   updatePublished(status: boolean): void {
+    if (status && (!this.currentTutorial.MovieTime || this.hasEmptyShowTime())) {
+      console.log('Validation failed:', this.currentTutorial.ShowTime, this.currentTutorial.MovieTime);
+      this.message = 'Please provide MovieTime and ensure all ShowTimes have valid Date and Time before publishing.';
+      return;
+    } else {
+      console.log('Validation passed:', this.currentTutorial.ShowTime, this.currentTutorial.MovieTime);
+    }
+  
     const data = {
       title: this.currentTutorial.title,
       description: this.currentTutorial.description,
+      ShowTime: this.currentTutorial.ShowTime,
+      MovieTime: this.currentTutorial.MovieTime,
       published: status
     };
-
+  
     this.message = '';
-
+  
     this.tutorialService.update(this.currentTutorial.id, data).subscribe({
       next: (res) => {
         console.log(res);
@@ -62,7 +73,6 @@ export class TutorialDetailsComponent {
       error: (e) => console.error(e)
     });
   }
-
   updateTutorial(): void {
     this.message = '';
 
@@ -88,4 +98,49 @@ export class TutorialDetailsComponent {
       error: (e) => console.error(e)
     });
   }
+  
+  addShowTime() {
+    this.currentTutorial.ShowTime = this.currentTutorial.ShowTime ?? [];
+  
+   
+  
+    this.currentTutorial.ShowTime.push({ date: '', hours: '', endTime: '' });
+  }
+
+
+deleteShowTime(): void {
+  if (this.currentTutorial.ShowTime && this.currentTutorial.ShowTime.length > 0) {
+    this.currentTutorial.ShowTime.pop();
+  }
 }
+private hasEmptyShowTime(): boolean {
+  return (
+    !!this.currentTutorial.ShowTime &&
+    this.currentTutorial.ShowTime.some(
+      (showTime) =>
+        !showTime.date || showTime.date.trim() === '' || !showTime.hours || showTime.hours.trim() === ''
+    )
+  );
+}
+
+
+
+getShowTimeByDateAndHour(date: String, hour: string): any | undefined {
+  if (this.currentTutorial.ShowTime) {
+    return this.currentTutorial.ShowTime.find(
+      (showTime) =>
+      showTime.date === date &&
+      showTime.hours == hour
+    );
+  }
+  return undefined;
+}
+
+
+
+}
+
+  
+
+  
+
